@@ -1,0 +1,17 @@
+{
+  "name": "gpt-image-2-jp",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/parse-source.mjs && astro build",
+    "preview": "astro preview",
+    "fetch-source": "curl -sL https://raw.githubusercontent.com/YouMind-OpenLab/awesome-gpt-image-2/main/README_ja-JP.md -o /tmp/source-readme-ja.md",
+    "parse": "node scripts/parse-source.mjs",
+    "update": "npm run fetch-source && npm run parse"
+  },
+  "dependencies": {
+    "astro": "^5.0.0"
+  }
+}

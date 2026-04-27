@@ -1,0 +1,302 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import prompts from '~/data/prompts.json';
+
+export function getStaticPaths() {
+  return (prompts as any[]).map((p) => ({
+    params: { id: p.id },
+    props: { entry: p },
+  }));
+}
+
+const { entry } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+---
+<Layout title={`${entry.title} | GPT Image 2 プロンプト集`} description={entry.description}>
+  <a class="back-link" href={stripBase('/')}>← 一覧に戻る</a>
+
+  <article class="detail">
+    <header class="detail-header">
+      {entry.category && <div class="detail-cat">{entry.category}</div>}
+      <h1 class="detail-title">{entry.title}</h1>
+      <div class="detail-badges">
+        {entry.isFeatured && <span class="b b-featured">⭐ 注目</span>}
+        {entry.isRaycast && <span class="b b-raycast">🚀 Raycast 対応</span>}
+        <span class="b b-lang">言語: {entry.language}</span>
+      </div>
+      {entry.description && <p class="detail-desc">{entry.description}</p>}
+    </header>
+
+    <section class="detail-images">
+      <h2 class="section-h">🖼️ 生成画像サンプル</h2>
+      <div class={`img-grid img-grid-${Math.min(entry.images.length, 3)}`}>
+        {entry.images.map((img: any, i: number) => (
+          <a href={img.src} target="_blank" rel="noopener" class="img-link">
+            <img src={img.src} alt={img.alt} loading="lazy" />
+            <span class="img-caption">サンプル {i + 1}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="detail-prompt">
+      <div class="section-h-row">
+        <h2 class="section-h">📝 プロンプト</h2>
+        <button class="copy-btn" id="copy-btn" type="button">
+          <span class="copy-default">📋 コピー</span>
+          <span class="copy-done">✓ コピーしました</span>
+        </button>
+      </div>
+      <pre class="prompt-block"><code id="prompt-text">{entry.prompt}</code></pre>
+      <p class="prompt-hint">
+        💡 このプロンプトを ChatGPT（GPT Image 2 が使えるアカウント）に貼り付けると、サンプル画像と同様の作品が日本語のテキスト付きで生成できます。
+        引用符 <code>{'{argument name="..." default="..."}'}</code> の部分は自由に書き換えてOK。
+      </p>
+    </section>
+
+    <section class="detail-meta">
+      <h2 class="section-h">📌 出典</h2>
+      <dl class="meta-list">
+        {entry.author && (
+          <>
+            <dt>作者</dt>
+            <dd><a href={entry.author.url} target="_blank" rel="noopener">{entry.author.name}</a></dd>
+          </>
+        )}
+        {entry.source && (
+          <>
+            <dt>元投稿</dt>
+            <dd><a href={entry.source.url} target="_blank" rel="noopener">{entry.source.label}</a></dd>
+          </>
+        )}
+        {entry.published && (
+          <>
+            <dt>公開日</dt>
+            <dd>{entry.published}</dd>
+          </>
+        )}
+        {entry.tryItUrl && (
+          <>
+            <dt>元ギャラリー</dt>
+            <dd><a href={entry.tryItUrl} target="_blank" rel="noopener">YouMind で見る →</a></dd>
+          </>
+        )}
+      </dl>
+    </section>
+  </article>
+</Layout>
+
+<script>
+  const btn = document.getElementById('copy-btn') as HTMLButtonElement;
+  const code = document.getElementById('prompt-text') as HTMLElement;
+  if (btn && code) {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(code.textContent || '');
+        btn.classList.add('copied');
+        setTimeout(() => btn.classList.remove('copied'), 1800);
+      } catch {
+        // fallback: select text
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const sel = window.getSelection();
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      }
+    });
+  }
+</script>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .back-link:hover { color: var(--accent); text-decoration: none; }
+
+  .detail-header {
+    margin-bottom: 36px;
+  }
+  .detail-cat {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(167, 139, 250, 0.1);
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .detail-title {
+    font-size: clamp(24px, 4vw, 36px);
+    line-height: 1.25;
+    margin: 0 0 12px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .detail-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 16px;
+  }
+  .b {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .b-featured { background: rgba(251, 191, 36, 0.15); color: var(--gold); }
+  .b-raycast { background: rgba(167, 139, 250, 0.15); color: var(--accent); }
+  .b-lang { background: var(--bg-elev); color: var(--text-dim); border: 1px solid var(--border); }
+  .detail-desc {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin: 16px 0 0;
+  }
+
+  .section-h {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin: 0 0 16px;
+    font-weight: 600;
+  }
+  .section-h-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-h-row .section-h { margin: 0; }
+
+  .detail-images {
+    margin-bottom: 40px;
+  }
+  .img-grid {
+    display: grid;
+    gap: 12px;
+  }
+  .img-grid-1 { grid-template-columns: 1fr; }
+  .img-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .img-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .img-link {
+    position: relative;
+    display: block;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .img-link:hover {
+    border-color: var(--accent);
+    text-decoration: none;
+  }
+  .img-link img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .img-caption {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+  }
+
+  .detail-prompt {
+    margin-bottom: 40px;
+  }
+  .copy-btn {
+    position: relative;
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .copy-btn .copy-done { display: none; color: #4ade80; }
+  .copy-btn.copied .copy-default { display: none; }
+  .copy-btn.copied .copy-done { display: inline; }
+  .copy-btn.copied { border-color: #4ade80; }
+
+  .prompt-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+  }
+  .prompt-block code {
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .prompt-hint {
+    margin: 16px 0 0;
+    padding: 14px 16px;
+    background: rgba(167, 139, 250, 0.06);
+    border: 1px solid rgba(167, 139, 250, 0.18);
+    border-radius: var(--radius);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-dim);
+  }
+  .prompt-hint code {
+    background: var(--bg-elev);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .detail-meta {
+    margin-bottom: 24px;
+  }
+  .meta-list {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 8px 16px;
+    margin: 0;
+    font-size: 14px;
+  }
+  .meta-list dt {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    align-self: center;
+  }
+  .meta-list dd {
+    margin: 0;
+    color: var(--text);
+  }
+
+  @media (max-width: 640px) {
+    .img-grid-2, .img-grid-3 { grid-template-columns: 1fr; }
+    .meta-list { grid-template-columns: 90px 1fr; font-size: 13px; }
+  }
+</style>

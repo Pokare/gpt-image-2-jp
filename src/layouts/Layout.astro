@@ -2,9 +2,13 @@
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
 }
-const { title = 'GPT Image 2 プロンプト集（日本語版）', description = 'GPT Image 2 の日本語プロンプトを厳選キュレーション。プロンプトをコピーしてあなたのChatGPTで日本語入りの画像を生成しよう。' } = Astro.props;
+const { title = 'GPT Image 2 プロンプト集（日本語版）', description = 'GPT Image 2 の日本語プロンプトを厳選キュレーション。プロンプトをコピーしてあなたのChatGPTで日本語入りの画像を生成しよう。', ogImage } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const SITE_ORIGIN = 'https://pokare.github.io';
+const canonicalUrl = `${SITE_ORIGIN}${Astro.url.pathname}`;
+const ogImageUrl = ogImage ?? `${SITE_ORIGIN}${base.replace(/\/$/, '')}/og-image.png`;
 ---
 <!doctype html>
 <html lang="ja">
@@ -14,10 +18,23 @@ const base = import.meta.env.BASE_URL;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1731" />
+    <meta property="og:image:height" content="909" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="GPT Image 2 プロンプト集（日本語版）" />
+
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
   </head>
   <body>

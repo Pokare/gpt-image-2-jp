@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.pokare.gpt-image-2-jp</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/taketoshisuzue/gpt-image-2-jp/scripts/update.sh</string>
+    </array>
+
+    <!-- Run daily at 09:00 local time -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>9</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- Catch up on missed runs (Mac was asleep) -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/taketoshisuzue/Library/Logs/gpt-image-2-jp.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/taketoshisuzue/Library/Logs/gpt-image-2-jp.err.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>/Users/taketoshisuzue</string>
+    </dict>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/taketoshisuzue/gpt-image-2-jp</string>
+
+    <!-- Networking required: don't run while offline -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>NetworkState</key>
+        <true/>
+    </dict>
+</dict>
+</plist>

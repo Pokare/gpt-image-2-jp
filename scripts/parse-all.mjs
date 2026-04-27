@@ -142,7 +142,10 @@ for (const e of allEntries) {
   }
 }
 
-const merged = [...byHash.values()];
+// Drop entries without sample images — useless on a visual curation site.
+const beforeFilter = byHash.size;
+const merged = [...byHash.values()].filter(e => Array.isArray(e.images) && e.images.length > 0);
+const droppedNoImages = beforeFilter - merged.length;
 
 // Sort: featured first, then by source stars desc, then by no
 const sectionOrder = { featured: 0, all: 1, other: 2 };
@@ -169,23 +172,33 @@ for (const source of sources) {
   lastUpdatedBySource[source.id] = m ? m[1] : null;
 }
 
+// Per-source displayed counts (after image filter and dedup)
+const displayedBySource = {};
+for (const e of merged) {
+  displayedBySource[e.sourceMeta.id] = (displayedBySource[e.sourceMeta.id] || 0) + 1;
+}
+
 const meta = {
   curatedCount: merged.length,
   totalImages,
   translated,
   pending,
   native,
+  droppedNoImages,
   categories: allCategories,
-  sources: sources.map(s => ({
-    id: s.id,
-    name: s.name,
-    fullName: s.fullName,
-    url: s.url,
-    stars: s.stars,
-    color: s.color,
-    lastUpdated: lastUpdatedBySource[s.id],
-    parsed: stats.perSource[s.id]?.parsed || 0,
-  })),
+  sources: sources
+    .map(s => ({
+      id: s.id,
+      name: s.name,
+      fullName: s.fullName,
+      url: s.url,
+      stars: s.stars,
+      color: s.color,
+      lastUpdated: lastUpdatedBySource[s.id],
+      parsed: stats.perSource[s.id]?.parsed || 0,
+      displayed: displayedBySource[s.id] || 0,
+    }))
+    .filter(s => s.displayed > 0),  // hide sources contributing zero displayed entries
   parsedAt: new Date().toISOString(),
 };
 
@@ -207,7 +220,7 @@ const pendingForTranslation = stats.missingTranslations.map(item => {
 });
 writeFileSync(resolve(OUT_DIR, 'pending-translations.json'), JSON.stringify(pendingForTranslation, null, 2));
 
-console.log(`Parsed ${merged.length} unique entries from ${sources.length} sources`);
+console.log(`Parsed ${merged.length} unique entries from ${sources.length} sources (${droppedNoImages} dropped: no preview image)`);
 for (const [sid, s] of Object.entries(stats.perSource)) {
   console.log(`  ${s.name}: ${s.parsed} entries${s.needsTranslation ? ' (needs translation)' : ''}`);
 }

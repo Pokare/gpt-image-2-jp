@@ -46,7 +46,7 @@ const lastUpdated = meta.parsedAt
         <a href={s.url} target="_blank" rel="noopener" class="source-pill" style={`--c: ${s.color}`}>
           <span class="source-dot"></span>
           <span class="source-name">{s.name}</span>
-          <span class="source-count">{s.parsed}件</span>
+          <span class="source-count">{s.displayed}件</span>
           <span class="source-stars">★{(s.stars / 1000).toFixed(1)}k</span>
         </a>
       ))}

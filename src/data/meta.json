@@ -1,23 +1,22 @@
 {
-  "curatedCount": 334,
-  "totalImages": 158,
-  "translated": 208,
+  "curatedCount": 290,
+  "totalImages": 322,
+  "translated": 164,
   "pending": 0,
   "native": 126,
+  "droppedNoImages": 44,
   "categories": [
     "Eコマース",
     "UI / アプリモックアップ",
     "YouTube サムネイル",
     "インフォグラフィック / 教育",
-    "キャラクターデザイン",
     "ゲーム / エンタメ",
     "コミック / ストーリーボード",
     "ソーシャルメディア",
     "プロダクトマーケティング",
     "プロフィール / アバター",
     "ポスター / イラスト",
-    "ポートレート / 写真",
-    "画像編集 / スタイル変換"
+    "ポートレート / 写真"
   ],
   "sources": [
     {
@@ -28,7 +27,8 @@
       "stars": 3063,
       "color": "#a78bfa",
       "lastUpdated": "2026-04-27T01:45:22.904Z",
-      "parsed": 126
+      "parsed": 126,
+      "displayed": 126
     },
     {
       "id": "evolinkai",
@@ -38,18 +38,9 @@
       "stars": 5866,
       "color": "#22d3ee",
       "lastUpdated": null,
-      "parsed": 167
-    },
-    {
-      "id": "anilmatcha",
-      "name": "Anil-matcha",
-      "fullName": "Anil-matcha/Awesome-GPT-Image-2-API-Prompts",
-      "url": "https://github.com/Anil-matcha/Awesome-GPT-Image-2-API-Prompts",
-      "stars": 1715,
-      "color": "#fb923c",
-      "lastUpdated": null,
-      "parsed": 49
+      "parsed": 167,
+      "displayed": 164
     }
   ],
-  "parsedAt": "2026-04-27T09:09:03.386Z"
+  "parsedAt": "2026-04-27T09:27:36.076Z"
 }

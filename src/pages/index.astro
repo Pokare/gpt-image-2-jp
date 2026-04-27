@@ -6,17 +6,18 @@ import meta from '~/data/meta.json';
 const base = import.meta.env.BASE_URL;
 const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
 
-// Sort: featured first, then by no within section, then by section order
 const sectionOrder: Record<string, number> = { featured: 0, all: 1, other: 2 };
 const sorted = [...prompts].sort((a: any, b: any) => {
-  const so = (sectionOrder[a._section] ?? 99) - (sectionOrder[b._section] ?? 99);
+  const so = (sectionOrder[a.sourceSection] ?? 99) - (sectionOrder[b.sourceSection] ?? 99);
   if (so !== 0) return so;
+  const ss = (b.sourceMeta.stars || 0) - (a.sourceMeta.stars || 0);
+  if (ss !== 0) return ss;
   return a.no - b.no;
 });
 
 const categories = ['すべて', ...meta.categories];
-const lastUpdated = meta.lastUpdatedUpstream
-  ? new Date(meta.lastUpdatedUpstream).toLocaleString('ja-JP', { dateStyle: 'long', timeStyle: 'short' })
+const lastUpdated = meta.parsedAt
+  ? new Date(meta.parsedAt).toLocaleString('ja-JP', { dateStyle: 'long', timeStyle: 'short' })
   : '不明';
 ---
 <Layout>
@@ -35,10 +36,20 @@ const lastUpdated = meta.lastUpdatedUpstream
         <div class="stat-num">{meta.totalImages}</div>
         <div class="stat-label">サンプル画像</div>
       </div>
-      <div class="stat stat-muted">
-        <div class="stat-num">{meta.totalPromptsUpstream?.toLocaleString() ?? '?'}</div>
-        <div class="stat-label">元データ総数</div>
+      <div class="stat">
+        <div class="stat-num">{meta.sources.length}</div>
+        <div class="stat-label">ソースリポ</div>
       </div>
+    </div>
+    <div class="source-stats">
+      {meta.sources.map((s: any) => (
+        <a href={s.url} target="_blank" rel="noopener" class="source-pill" style={`--c: ${s.color}`}>
+          <span class="source-dot"></span>
+          <span class="source-name">{s.name}</span>
+          <span class="source-count">{s.parsed}件</span>
+          <span class="source-stars">★{(s.stars / 1000).toFixed(1)}k</span>
+        </a>
+      ))}
     </div>
     <p class="hero-meta">最終同期: {lastUpdated}</p>
   </section>
@@ -47,15 +58,31 @@ const lastUpdated = meta.lastUpdatedUpstream
     <input
       type="search"
       id="search"
-      placeholder="🔍 タイトル・説明・プロンプト本文で検索..."
+      placeholder="🔍 タイトル・説明・プロンプト本文・カテゴリで検索..."
       autocomplete="off"
     />
-    <div class="filters" id="filters">
-      {categories.map((c) => (
-        <button class="chip" data-cat={c} type="button">
-          {c}
-        </button>
-      ))}
+
+    <div class="filter-group">
+      <span class="filter-label">ソース</span>
+      <div class="filters" id="source-filters">
+        <button class="chip chip-source active" data-src="すべて" type="button">すべて</button>
+        {meta.sources.map((s: any) => (
+          <button class="chip chip-source" data-src={s.id} type="button" style={`--c: ${s.color}`}>
+            <span class="source-dot"></span>{s.name}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <span class="filter-label">カテゴリ</span>
+      <div class="filters" id="cat-filters">
+        {categories.map((c) => (
+          <button class={`chip ${c === 'すべて' ? 'active' : ''}`} data-cat={c} type="button">
+            {c}
+          </button>
+        ))}
+      </div>
     </div>
   </section>
 
@@ -64,7 +91,8 @@ const lastUpdated = meta.lastUpdatedUpstream
       <a class="card"
          href={stripBase(`/p/${p.id}/`)}
          data-cat={p.category || ''}
-         data-search={`${p.title} ${p.description} ${p.prompt} ${p.category || ''}`.toLowerCase()}>
+         data-src={p.sourceMeta.id}
+         data-search={`${p.title} ${p.titleOriginal || ''} ${p.description} ${p.prompt} ${p.category || ''}`.toLowerCase()}>
         <div class="card-img-wrap">
           {p.images[0] ? (
             <img src={p.images[0].src} alt={p.images[0].alt} loading="lazy" />
@@ -73,43 +101,49 @@ const lastUpdated = meta.lastUpdatedUpstream
           )}
           {p.isFeatured && <span class="badge badge-featured">⭐ 注目</span>}
           {p.images.length > 1 && <span class="badge badge-count">+{p.images.length - 1}</span>}
+          <span class="badge badge-source" style={`background: ${p.sourceMeta.color}`}>
+            {p.sourceMeta.name}
+          </span>
         </div>
         <div class="card-body">
           {p.category && <span class="card-cat">{p.category}</span>}
           <h3 class="card-title">{p.title}</h3>
-          <p class="card-desc">{p.description}</p>
+          {p.description && <p class="card-desc">{p.description}</p>}
         </div>
       </a>
     ))}
   </section>
 
   <p class="empty-state" id="empty" hidden>
-    該当するプロンプトが見つかりませんでした。検索ワードを変えるか、カテゴリを「すべて」にしてみてください。
+    該当するプロンプトが見つかりませんでした。フィルターか検索ワードを変えてみてください。
   </p>
 </Layout>
 
 <script>
   const search = document.getElementById('search') as HTMLInputElement;
-  const filters = document.getElementById('filters') as HTMLDivElement;
+  const sourceFilters = document.getElementById('source-filters') as HTMLDivElement;
+  const catFilters = document.getElementById('cat-filters') as HTMLDivElement;
   const grid = document.getElementById('grid') as HTMLElement;
   const empty = document.getElementById('empty') as HTMLElement;
   const cards = Array.from(grid.querySelectorAll<HTMLElement>('.card'));
 
+  let activeSrc = 'すべて';
   let activeCat = 'すべて';
   let query = '';
 
-  // Set initial active chip
-  const firstChip = filters.querySelector<HTMLElement>('.chip[data-cat="すべて"]');
-  firstChip?.classList.add('active');
+  function bindFilter(container: HTMLElement, key: string, setter: (v: string) => void) {
+    container.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement).closest('.chip') as HTMLElement | null;
+      if (!target) return;
+      setter(target.dataset[key] || 'すべて');
+      container.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
+      target.classList.add('active');
+      apply();
+    });
+  }
 
-  filters.addEventListener('click', (e) => {
-    const target = (e.target as HTMLElement).closest('.chip') as HTMLElement | null;
-    if (!target) return;
-    activeCat = target.dataset.cat || 'すべて';
-    filters.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
-    target.classList.add('active');
-    apply();
-  });
+  bindFilter(sourceFilters, 'src', (v) => { activeSrc = v; });
+  bindFilter(catFilters, 'cat', (v) => { activeCat = v; });
 
   search.addEventListener('input', () => {
     query = search.value.trim().toLowerCase();
@@ -120,10 +154,12 @@ const lastUpdated = meta.lastUpdatedUpstream
     let shown = 0;
     cards.forEach((card) => {
       const cat = card.dataset.cat || '';
+      const src = card.dataset.src || '';
       const text = card.dataset.search || '';
+      const matchSrc = activeSrc === 'すべて' || src === activeSrc;
       const matchCat = activeCat === 'すべて' || cat === activeCat;
       const matchQuery = query === '' || text.includes(query);
-      const visible = matchCat && matchQuery;
+      const visible = matchSrc && matchCat && matchQuery;
       card.style.display = visible ? '' : 'none';
       if (visible) shown++;
     });
@@ -158,7 +194,7 @@ const lastUpdated = meta.lastUpdatedUpstream
     display: flex;
     justify-content: center;
     gap: 24px;
-    margin: 28px 0 12px;
+    margin: 28px 0 16px;
     flex-wrap: wrap;
   }
   .stat {
@@ -169,7 +205,6 @@ const lastUpdated = meta.lastUpdatedUpstream
     border-radius: var(--radius);
     min-width: 100px;
   }
-  .stat-muted .stat-num { color: var(--text-muted); }
   .stat-num {
     font-size: 26px;
     font-weight: 700;
@@ -182,6 +217,42 @@ const lastUpdated = meta.lastUpdatedUpstream
     margin-top: 6px;
     letter-spacing: 0.05em;
   }
+  .source-stats {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px auto 12px;
+    max-width: 720px;
+  }
+  .source-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .source-pill:hover {
+    border-color: var(--c);
+    color: var(--text);
+    text-decoration: none;
+  }
+  .source-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c, var(--accent));
+    flex-shrink: 0;
+  }
+  .source-name { font-weight: 600; color: var(--text); }
+  .source-count { color: var(--text-dim); }
+  .source-stars { color: var(--gold); font-size: 11px; }
   .hero-meta {
     font-size: 12px;
     color: var(--text-muted);
@@ -205,16 +276,32 @@ const lastUpdated = meta.lastUpdatedUpstream
     font-family: inherit;
     transition: border-color 0.15s;
   }
-  #search:focus {
-    outline: none;
-    border-color: var(--accent);
+  #search:focus { outline: none; border-color: var(--accent); }
+  .filter-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .filter-label {
+    flex-shrink: 0;
+    padding: 8px 0;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    min-width: 56px;
   }
   .filters {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    flex: 1;
   }
   .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     padding: 8px 14px;
     background: var(--bg-elev);
     border: 1px solid var(--border);
@@ -225,16 +312,18 @@ const lastUpdated = meta.lastUpdatedUpstream
     cursor: pointer;
     transition: all 0.15s;
   }
-  .chip:hover {
-    color: var(--text);
-    border-color: var(--border-strong);
-  }
+  .chip:hover { color: var(--text); border-color: var(--border-strong); }
   .chip.active {
     background: var(--accent);
     border-color: var(--accent);
     color: #1a1a1f;
     font-weight: 600;
   }
+  .chip-source.active {
+    background: var(--c, var(--accent));
+    border-color: var(--c, var(--accent));
+  }
+  .chip-source.active .source-dot { background: rgba(0,0,0,0.4); }
 
   .grid {
     display: grid;
@@ -298,6 +387,15 @@ const lastUpdated = meta.lastUpdatedUpstream
     background: rgba(0, 0, 0, 0.6);
     color: white;
   }
+  .badge-source {
+    bottom: 10px;
+    left: 10px;
+    color: #0e0e10;
+    font-size: 10px;
+    padding: 3px 8px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+  }
   .card-body {
     padding: 14px 16px 18px;
     display: flex;
@@ -338,5 +436,10 @@ const lastUpdated = meta.lastUpdatedUpstream
     color: var(--text-muted);
     padding: 48px 0;
     font-size: 14px;
+  }
+
+  @media (max-width: 640px) {
+    .filter-group { flex-direction: column; gap: 6px; }
+    .filter-label { padding: 0; }
   }
 </style>

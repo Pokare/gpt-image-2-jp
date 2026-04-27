@@ -12,38 +12,50 @@ export function getStaticPaths() {
 const { entry } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
+
+const isTranslated = entry.translationStatus === 'translated';
+const hasOriginal = !!entry.promptOriginal && entry.promptOriginal !== entry.prompt;
 ---
-<Layout title={`${entry.title} | GPT Image 2 プロンプト集`} description={entry.description}>
+<Layout title={`${entry.title} | GPT Image 2 プロンプト集`} description={entry.description || entry.title}>
   <a class="back-link" href={stripBase('/')}>← 一覧に戻る</a>
 
   <article class="detail">
     <header class="detail-header">
       {entry.category && <div class="detail-cat">{entry.category}</div>}
       <h1 class="detail-title">{entry.title}</h1>
+      {isTranslated && entry.titleOriginal && (
+        <p class="detail-title-orig">原文: {entry.titleOriginal}</p>
+      )}
       <div class="detail-badges">
+        <span class="b b-source" style={`background: ${entry.sourceMeta.color}`}>
+          {entry.sourceMeta.name}
+        </span>
         {entry.isFeatured && <span class="b b-featured">⭐ 注目</span>}
         {entry.isRaycast && <span class="b b-raycast">🚀 Raycast 対応</span>}
-        <span class="b b-lang">言語: {entry.language}</span>
+        {isTranslated && <span class="b b-translated">🇯🇵 日本語化済み</span>}
+        {entry.translationStatus === 'native' && <span class="b b-native">✨ ネイティブ日本語</span>}
       </div>
       {entry.description && <p class="detail-desc">{entry.description}</p>}
     </header>
 
-    <section class="detail-images">
-      <h2 class="section-h">🖼️ 生成画像サンプル</h2>
-      <div class={`img-grid img-grid-${Math.min(entry.images.length, 3)}`}>
-        {entry.images.map((img: any, i: number) => (
-          <a href={img.src} target="_blank" rel="noopener" class="img-link">
-            <img src={img.src} alt={img.alt} loading="lazy" />
-            <span class="img-caption">サンプル {i + 1}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    {entry.images.length > 0 && (
+      <section class="detail-images">
+        <h2 class="section-h">🖼️ 生成画像サンプル</h2>
+        <div class={`img-grid img-grid-${Math.min(entry.images.length, 3)}`}>
+          {entry.images.map((img: any, i: number) => (
+            <a href={img.src} target="_blank" rel="noopener" class="img-link">
+              <img src={img.src} alt={img.alt} loading="lazy" />
+              <span class="img-caption">サンプル {i + 1}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
 
     <section class="detail-prompt">
       <div class="section-h-row">
-        <h2 class="section-h">📝 プロンプト</h2>
-        <button class="copy-btn" id="copy-btn" type="button">
+        <h2 class="section-h">📝 プロンプト（日本語）</h2>
+        <button class="copy-btn" data-target="prompt-text" type="button">
           <span class="copy-default">📋 コピー</span>
           <span class="copy-done">✓ コピーしました</span>
         </button>
@@ -51,23 +63,43 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
       <pre class="prompt-block"><code id="prompt-text">{entry.prompt}</code></pre>
       <p class="prompt-hint">
         💡 このプロンプトを ChatGPT（GPT Image 2 が使えるアカウント）に貼り付けると、サンプル画像と同様の作品が日本語のテキスト付きで生成できます。
-        引用符 <code>{'{argument name="..." default="..."}'}</code> の部分は自由に書き換えてOK。
+        <code>{'{argument name="..." default="..."}'}</code> の部分は自由に書き換えてOK。
       </p>
+
+      {hasOriginal && (
+        <details class="orig-toggle">
+          <summary>原文プロンプト（{entry.sourceMeta.id === 'youmind' ? '同じ内容' : '英語'}）を表示</summary>
+          <div class="section-h-row" style="margin-top: 12px;">
+            <h3 class="section-h" style="font-size: 12px;">原文プロンプト</h3>
+            <button class="copy-btn" data-target="prompt-orig" type="button">
+              <span class="copy-default">📋 コピー</span>
+              <span class="copy-done">✓</span>
+            </button>
+          </div>
+          <pre class="prompt-block"><code id="prompt-orig">{entry.promptOriginal}</code></pre>
+        </details>
+      )}
     </section>
 
     <section class="detail-meta">
-      <h2 class="section-h">📌 出典</h2>
+      <h2 class="section-h">📌 出典・帰属</h2>
       <dl class="meta-list">
+        <dt>ソース</dt>
+        <dd>
+          <a href={entry.sourceMeta.url} target="_blank" rel="noopener">
+            {entry.sourceMeta.name}（GitHub ★{(entry.sourceMeta.stars / 1000).toFixed(1)}k）
+          </a>
+        </dd>
         {entry.author && (
           <>
             <dt>作者</dt>
             <dd><a href={entry.author.url} target="_blank" rel="noopener">{entry.author.name}</a></dd>
           </>
         )}
-        {entry.source && (
+        {entry.sourcePost && entry.sourcePost.url !== entry.author?.url && (
           <>
             <dt>元投稿</dt>
-            <dd><a href={entry.source.url} target="_blank" rel="noopener">{entry.source.label}</a></dd>
+            <dd><a href={entry.sourcePost.url} target="_blank" rel="noopener">{entry.sourcePost.label}</a></dd>
           </>
         )}
         {entry.published && (
@@ -76,28 +108,44 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
             <dd>{entry.published}</dd>
           </>
         )}
-        {entry.tryItUrl && (
+        {entry.externalGalleryUrl && (
           <>
             <dt>元ギャラリー</dt>
-            <dd><a href={entry.tryItUrl} target="_blank" rel="noopener">YouMind で見る →</a></dd>
+            <dd><a href={entry.externalGalleryUrl} target="_blank" rel="noopener">YouMind で見る →</a></dd>
+          </>
+        )}
+        {entry.alsoFoundIn && entry.alsoFoundIn.length > 0 && (
+          <>
+            <dt>他ソースにも掲載</dt>
+            <dd>
+              {entry.alsoFoundIn.map((s: any) => (
+                <a href={s.url} target="_blank" rel="noopener" class="also-source" style={`--c: ${s.color}`}>
+                  {s.name}
+                </a>
+              ))}
+            </dd>
           </>
         )}
       </dl>
+      <p class="license-note">
+        ※ 本サイトはCC BY 4.0ライセンスのもと、上記ソースのプロンプトを再掲しています。元プロンプトの著者に帰属します。
+      </p>
     </section>
   </article>
 </Layout>
 
 <script>
-  const btn = document.getElementById('copy-btn') as HTMLButtonElement;
-  const code = document.getElementById('prompt-text') as HTMLElement;
-  if (btn && code) {
+  document.querySelectorAll<HTMLButtonElement>('.copy-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
+      const targetId = btn.dataset.target;
+      if (!targetId) return;
+      const code = document.getElementById(targetId);
+      if (!code) return;
       try {
         await navigator.clipboard.writeText(code.textContent || '');
         btn.classList.add('copied');
         setTimeout(() => btn.classList.remove('copied'), 1800);
       } catch {
-        // fallback: select text
         const range = document.createRange();
         range.selectNodeContents(code);
         const sel = window.getSelection();
@@ -105,7 +153,7 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
         sel?.addRange(range);
       }
     });
-  }
+  });
 </script>
 
 <style>
@@ -117,9 +165,7 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
   }
   .back-link:hover { color: var(--accent); text-decoration: none; }
 
-  .detail-header {
-    margin-bottom: 36px;
-  }
+  .detail-header { margin-bottom: 36px; }
   .detail-cat {
     display: inline-block;
     font-size: 12px;
@@ -134,9 +180,15 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
   .detail-title {
     font-size: clamp(24px, 4vw, 36px);
     line-height: 1.25;
-    margin: 0 0 12px;
+    margin: 0 0 4px;
     font-weight: 800;
     letter-spacing: -0.02em;
+  }
+  .detail-title-orig {
+    margin: 0 0 12px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
   }
   .detail-badges {
     display: flex;
@@ -150,9 +202,11 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
     font-size: 12px;
     font-weight: 500;
   }
+  .b-source { color: #0e0e10; font-weight: 600; }
   .b-featured { background: rgba(251, 191, 36, 0.15); color: var(--gold); }
   .b-raycast { background: rgba(167, 139, 250, 0.15); color: var(--accent); }
-  .b-lang { background: var(--bg-elev); color: var(--text-dim); border: 1px solid var(--border); }
+  .b-translated { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+  .b-native { background: rgba(167, 139, 250, 0.15); color: var(--accent); }
   .detail-desc {
     font-size: 16px;
     line-height: 1.7;
@@ -176,13 +230,8 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
   }
   .section-h-row .section-h { margin: 0; }
 
-  .detail-images {
-    margin-bottom: 40px;
-  }
-  .img-grid {
-    display: grid;
-    gap: 12px;
-  }
+  .detail-images { margin-bottom: 40px; }
+  .img-grid { display: grid; gap: 12px; }
   .img-grid-1 { grid-template-columns: 1fr; }
   .img-grid-2 { grid-template-columns: repeat(2, 1fr); }
   .img-grid-3 { grid-template-columns: repeat(3, 1fr); }
@@ -195,15 +244,8 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
     background: var(--bg-elev);
     transition: border-color 0.15s, transform 0.15s;
   }
-  .img-link:hover {
-    border-color: var(--accent);
-    text-decoration: none;
-  }
-  .img-link img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
+  .img-link:hover { border-color: var(--accent); text-decoration: none; }
+  .img-link img { width: 100%; height: auto; display: block; }
   .img-caption {
     position: absolute;
     bottom: 8px;
@@ -215,9 +257,7 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
     font-size: 11px;
   }
 
-  .detail-prompt {
-    margin-bottom: 40px;
-  }
+  .detail-prompt { margin-bottom: 40px; }
   .copy-btn {
     position: relative;
     background: var(--bg-elev);
@@ -231,10 +271,7 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
     cursor: pointer;
     transition: all 0.15s;
   }
-  .copy-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
   .copy-btn .copy-done { display: none; color: #4ade80; }
   .copy-btn.copied .copy-default { display: none; }
   .copy-btn.copied .copy-done { display: inline; }
@@ -272,15 +309,28 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
     border-radius: 4px;
     font-size: 12px;
   }
-
-  .detail-meta {
-    margin-bottom: 24px;
+  .orig-toggle {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
   }
+  .orig-toggle summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-dim);
+    user-select: none;
+  }
+  .orig-toggle summary:hover { color: var(--text); }
+  .orig-toggle[open] summary { color: var(--text); margin-bottom: 4px; }
+
+  .detail-meta { margin-bottom: 24px; }
   .meta-list {
     display: grid;
-    grid-template-columns: 100px 1fr;
+    grid-template-columns: 120px 1fr;
     gap: 8px 16px;
-    margin: 0;
+    margin: 0 0 16px;
     font-size: 14px;
   }
   .meta-list dt {
@@ -290,13 +340,27 @@ const stripBase = (p: string) => `${base.replace(/\/$/, '')}${p}`;
     letter-spacing: 0.04em;
     align-self: center;
   }
-  .meta-list dd {
-    margin: 0;
-    color: var(--text);
+  .meta-list dd { margin: 0; color: var(--text); }
+  .also-source {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-right: 6px;
+    background: var(--bg-elev);
+    border: 1px solid var(--c, var(--border));
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--c, var(--text));
+    text-decoration: none;
+  }
+  .license-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 16px 0 0;
+    line-height: 1.6;
   }
 
   @media (max-width: 640px) {
     .img-grid-2, .img-grid-3 { grid-template-columns: 1fr; }
-    .meta-list { grid-template-columns: 90px 1fr; font-size: 13px; }
+    .meta-list { grid-template-columns: 100px 1fr; font-size: 13px; }
   }
 </style>

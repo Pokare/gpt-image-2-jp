@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/parse-source.mjs && astro build",
+    "build": "npm run parse && astro build",
     "preview": "astro preview",
-    "fetch-source": "curl -sL https://raw.githubusercontent.com/YouMind-OpenLab/awesome-gpt-image-2/main/README_ja-JP.md -o /tmp/source-readme-ja.md",
-    "parse": "node scripts/parse-source.mjs",
-    "update": "npm run fetch-source && npm run parse"
+    "fetch-sources": "node scripts/fetch-sources.mjs",
+    "parse": "node scripts/parse-all.mjs",
+    "update": "npm run fetch-sources && npm run parse"
   },
   "dependencies": {
     "astro": "^5.0.0"

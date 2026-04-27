@@ -1,21 +1,55 @@
 {
-  "totalPromptsUpstream": 2474,
-  "featuredCountUpstream": 6,
-  "lastUpdatedUpstream": "2026-04-27T01:45:22.904Z",
-  "curatedCount": 126,
-  "totalImages": 157,
-  "parsedAt": "2026-04-27T08:28:28.482Z",
-  "sourceUrl": "https://github.com/YouMind-OpenLab/awesome-gpt-image-2",
-  "sourceLicense": "CC BY 4.0",
-  "sourceAuthor": "YouMind OpenLab",
+  "curatedCount": 334,
+  "totalImages": 158,
+  "translated": 208,
+  "pending": 0,
+  "native": 126,
   "categories": [
-    "E コマースのメイン画像",
+    "Eコマース",
+    "UI / アプリモックアップ",
     "YouTube サムネイル",
-    "インフォグラフィック / 教育ビジュアル",
-    "ゲームアセット",
+    "インフォグラフィック / 教育",
+    "キャラクターデザイン",
+    "ゲーム / エンタメ",
     "コミック / ストーリーボード",
-    "ソーシャルメディア投稿",
+    "ソーシャルメディア",
     "プロダクトマーケティング",
-    "プロフィール / アバター"
-  ]
+    "プロフィール / アバター",
+    "ポスター / イラスト",
+    "ポートレート / 写真",
+    "画像編集 / スタイル変換"
+  ],
+  "sources": [
+    {
+      "id": "youmind",
+      "name": "YouMind",
+      "fullName": "YouMind-OpenLab/awesome-gpt-image-2",
+      "url": "https://github.com/YouMind-OpenLab/awesome-gpt-image-2",
+      "stars": 3063,
+      "color": "#a78bfa",
+      "lastUpdated": "2026-04-27T01:45:22.904Z",
+      "parsed": 126
+    },
+    {
+      "id": "evolinkai",
+      "name": "EvoLinkAI",
+      "fullName": "EvoLinkAI/awesome-gpt-image-2-prompts",
+      "url": "https://github.com/EvoLinkAI/awesome-gpt-image-2-prompts",
+      "stars": 5866,
+      "color": "#22d3ee",
+      "lastUpdated": null,
+      "parsed": 167
+    },
+    {
+      "id": "anilmatcha",
+      "name": "Anil-matcha",
+      "fullName": "Anil-matcha/Awesome-GPT-Image-2-API-Prompts",
+      "url": "https://github.com/Anil-matcha/Awesome-GPT-Image-2-API-Prompts",
+      "stars": 1715,
+      "color": "#fb923c",
+      "lastUpdated": null,
+      "parsed": 49
+    }
+  ],
+  "parsedAt": "2026-04-27T09:09:03.386Z"
 }

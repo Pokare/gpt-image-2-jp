@@ -1,0 +1,41 @@
+[
+  {
+    "id": "youmind",
+    "name": "YouMind",
+    "fullName": "YouMind-OpenLab/awesome-gpt-image-2",
+    "url": "https://github.com/YouMind-OpenLab/awesome-gpt-image-2",
+    "rawUrl": "https://raw.githubusercontent.com/YouMind-OpenLab/awesome-gpt-image-2/main/README_ja-JP.md",
+    "stars": 3063,
+    "format": "youmind-ja",
+    "language": "ja",
+    "needsTranslation": false,
+    "license": "CC BY 4.0",
+    "color": "#a78bfa"
+  },
+  {
+    "id": "evolinkai",
+    "name": "EvoLinkAI",
+    "fullName": "EvoLinkAI/awesome-gpt-image-2-prompts",
+    "url": "https://github.com/EvoLinkAI/awesome-gpt-image-2-prompts",
+    "rawUrl": "https://raw.githubusercontent.com/EvoLinkAI/awesome-gpt-image-2-prompts/main/README.md",
+    "stars": 5866,
+    "format": "evolinkai",
+    "language": "en",
+    "needsTranslation": true,
+    "license": "CC BY 4.0",
+    "color": "#22d3ee"
+  },
+  {
+    "id": "anilmatcha",
+    "name": "Anil-matcha",
+    "fullName": "Anil-matcha/Awesome-GPT-Image-2-API-Prompts",
+    "url": "https://github.com/Anil-matcha/Awesome-GPT-Image-2-API-Prompts",
+    "rawUrl": "https://raw.githubusercontent.com/Anil-matcha/Awesome-GPT-Image-2-API-Prompts/main/README.md",
+    "stars": 1715,
+    "format": "anilmatcha",
+    "language": "en",
+    "needsTranslation": true,
+    "license": "CC BY 4.0",
+    "color": "#fb923c"
+  }
+]

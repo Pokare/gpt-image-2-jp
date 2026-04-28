@@ -1,16 +1,17 @@
 {
-  "curatedCount": 290,
-  "totalImages": 322,
+  "curatedCount": 413,
+  "totalImages": 446,
   "translated": 164,
-  "pending": 0,
+  "pending": 123,
   "native": 126,
   "droppedNoImages": 44,
   "categories": [
+    "Comparison & Community Examples",
     "Eコマース",
     "UI / アプリモックアップ",
     "YouTube サムネイル",
     "インフォグラフィック / 教育",
-    "ゲーム / エンタメ",
+    "キャラクターデザイン",
     "コミック / ストーリーボード",
     "ソーシャルメディア",
     "プロダクトマーケティング",
@@ -26,7 +27,7 @@
       "url": "https://github.com/YouMind-OpenLab/awesome-gpt-image-2",
       "stars": 3063,
       "color": "#a78bfa",
-      "lastUpdated": "2026-04-27T01:45:22.904Z",
+      "lastUpdated": "2026-04-27T13:16:01.168Z",
       "parsed": 126,
       "displayed": 126
     },
@@ -38,9 +39,9 @@
       "stars": 5866,
       "color": "#22d3ee",
       "lastUpdated": null,
-      "parsed": 167,
-      "displayed": 164
+      "parsed": 290,
+      "displayed": 287
     }
   ],
-  "parsedAt": "2026-04-27T11:29:22.929Z"
+  "parsedAt": "2026-04-28T00:00:07.430Z"
 }

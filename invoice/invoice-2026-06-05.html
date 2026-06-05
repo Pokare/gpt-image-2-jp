@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>請求書 2026-06-05</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #666;
+    --line: #d0d0d0;
+    --accent: #2b4a7a;
+    --soft: #f4f6fa;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+    color: var(--ink);
+    background: #e9ecef;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 16px auto;
+    padding: 22mm 18mm;
+    background: #fff;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.12);
+  }
+  h1 {
+    text-align: center;
+    font-size: 30px;
+    letter-spacing: 0.5em;
+    margin: 0 0 28px;
+    padding-left: 0.5em;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 12px;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .to { flex: 1; }
+  .to .name {
+    font-size: 20px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 6px;
+    display: inline-block;
+    min-width: 60%;
+  }
+  .to .addr {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .meta {
+    text-align: right;
+    font-size: 13px;
+    line-height: 1.9;
+    white-space: nowrap;
+  }
+  .meta .label { color: var(--muted); margin-right: 8px; }
+  .lead {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .total-box {
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--accent);
+    padding: 16px 20px;
+    margin: 8px 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .total-box .t-label { font-size: 16px; font-weight: 700; }
+  .total-box .t-amount { font-size: 28px; font-weight: 800; color: var(--accent); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  tbody td {
+    border-bottom: 1px solid var(--line);
+    padding: 11px 12px;
+  }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  td.center { text-align: center; }
+  tbody tr.empty td { height: 38px; }
+  .summary {
+    margin-top: 18px;
+    margin-left: auto;
+    width: 46%;
+    font-size: 14px;
+  }
+  .summary .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  .summary .row.grand {
+    border-bottom: none;
+    border-top: 2px solid var(--accent);
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .summary .row .v { white-space: nowrap; }
+  .pay {
+    margin-top: 32px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .pay .h {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--accent);
+  }
+  .issuer {
+    margin-top: 28px;
+    text-align: right;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .issuer .co { font-size: 15px; font-weight: 700; }
+  .placeholder { color: #b00; }
+  .note {
+    margin-top: 18px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  @media print {
+    body { background: #fff; }
+    .sheet { margin: 0; box-shadow: none; width: auto; min-height: auto; }
+    @page { size: A4; margin: 14mm; }
+  }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>請求書</h1>
+
+    <div class="top">
+      <div class="to">
+        <div class="name"><span class="placeholder">〇〇〇〇</span> 御中</div>
+        <div class="addr">
+          〒<span class="placeholder">000-0000</span><br>
+          <span class="placeholder">（宛先のご住所）</span>
+        </div>
+      </div>
+      <div class="meta">
+        <div><span class="label">請求書番号</span><span class="placeholder">2026-0605-001</span></div>
+        <div><span class="label">発行日</span>2026年6月5日</div>
+      </div>
+    </div>
+
+    <p class="lead">下記のとおりご請求申し上げます。</p>
+
+    <div class="total-box">
+      <span class="t-label">ご請求金額（税込）</span>
+      <span class="t-amount">￥5,359,480 -</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:44%">品目・摘要</th>
+          <th class="num" style="width:12%">数量</th>
+          <th class="num" style="width:10%">単位</th>
+          <th class="num" style="width:17%">単価</th>
+          <th class="num" style="width:17%">金額</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="placeholder">業務委託料 一式</span></td>
+          <td class="num">1</td>
+          <td class="center">式</td>
+          <td class="num">4,872,254</td>
+          <td class="num">4,872,254</td>
+        </tr>
+        <tr class="empty"><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="empty"><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr class="empty"><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <div class="summary">
+      <div class="row"><span>小計（税抜）</span><span class="v">￥4,872,254</span></div>
+      <div class="row"><span>消費税（10%）</span><span class="v">￥487,226</span></div>
+      <div class="row grand"><span>合計（税込）</span><span class="v">￥5,359,480</span></div>
+    </div>
+
+    <div class="pay">
+      <div class="h">お支払いについて</div>
+      <div>お支払期限：2026年6月5日</div>
+      <div>お振込先：<span class="placeholder">〇〇銀行 〇〇支店　普通 0000000　口座名義 〇〇〇〇</span></div>
+      <div>※ 振込手数料は貴社にてご負担くださいますようお願い申し上げます。</div>
+    </div>
+
+    <div class="issuer">
+      <div class="co"><span class="placeholder">〇〇〇〇株式会社</span></div>
+      <div>〒<span class="placeholder">000-0000</span>　<span class="placeholder">（発行者のご住所）</span></div>
+      <div>TEL：<span class="placeholder">00-0000-0000</span>　登録番号：<span class="placeholder">T0000000000000</span></div>
+    </div>
+
+    <p class="note">
+      ※ 税抜金額は税込金額（5,359,480円）÷1.1の小数点以下を切り捨てて算出し、消費税は税込金額との差額（5,359,480 − 4,872,254 = 487,226円）としています。<br>
+      ※ <span class="placeholder">赤字</span>の項目は実際の情報に置き換えてご利用ください。
+    </p>
+  </div>
+</body>
+</html>
